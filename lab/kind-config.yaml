@@ -1,0 +1,8 @@
+# 1 个控制面 + 2 个 worker。多个 worker 是为了之后练习 drain / PDB(#28)。
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: flux-lab
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker

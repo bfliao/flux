@@ -1,0 +1,41 @@
+# Flux 的同步入口。up.sh 会把 __REPO_URL__ / __BRANCH__ 替换后 apply。
+# 名字沿用 prod 的 "cluster",方便和 bootstrap/prod/cluster.yaml 对照。
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: cluster
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: __BRANCH__
+  url: __REPO_URL__
+  __SECRET_REF__
+---
+# 只同步两个不依赖真实硬件的 app。
+# cluster/apps 下没有 kustomization.yaml,Flux 会自动把目录里所有 YAML 当作资源。
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: lab-templates
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./cluster/apps/templates
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cluster
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: lab-labmap
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./cluster/apps/labmap
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cluster
